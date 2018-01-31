@@ -4,7 +4,7 @@
 
 int isPrime(int num){
     int squareRoot = sqrt(num);
-    for (squareRoot; squareRoot > 0; squareRoot --){
+    for (squareRoot; squareRoot > 1; squareRoot --){
         if (num % squareRoot == 0){
             return 0;
         }
@@ -18,7 +18,7 @@ int main()
     printf("Enter an integer between 1 to 100 (1 and 100 excluded): \n");
     scanf("%d", &input);
     if (input <= 1 || input >= 100){
-        printf("not in range");
+        printf("not in range\n");
         return 1;
     }
     else {

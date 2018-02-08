@@ -58,15 +58,15 @@ int main(int argc, char *argv[])
 
     /* Create a linked list with the integers from the array */
     struct node *linkedList = create_list(intArray, arrayLength); 
-    
+
     /* Print the linked list */
     print_list(linkedList); 
 
     /* Repeatedly prompt the user for a number to be searched.
-    *  Search the array for the number and print out the result as shown in the specs.
-    *  Search the linked list for the number and print out the result as shown in the specs.
-    *  Stop prompting when the user enters 'q' (just the character q without the single quotes).
-    */
+     *  Search the array for the number and print out the result as shown in the specs.
+     *  Search the linked list for the number and print out the result as shown in the specs.
+     *  Stop prompting when the user enters 'q' (just the character q without the single quotes).
+     */
     int search = 1;
     do {
         int searchNum;
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     struct node *sortedList = create_sorted_list(linkedList);
 
     /* Print the sorted list */
-    //print_list(sortedList);
+    print_list(sortedList);
 
     /* Copy the sorted list to an array with the same sorted order */
 
@@ -131,8 +131,8 @@ struct node* create_list(int intarray[], int len)
     head = add_item_at_start(NULL, intarray[0]);
     int i = 1;
     do{
-         head = add_item_at_start(head, intarray[i]); 
-         i++;
+        head = add_item_at_start(head, intarray[i]); 
+        i++;
     } while(i < len);
     return head;
 }
@@ -191,8 +191,9 @@ struct node* create_sorted_list(struct node *head)
     if (sortedList == NULL){
         exit(1);
     }
-    sortedList -> data = 0;
+    sortedList -> data = head -> data;
     sortedList -> next = NULL;
+    head = head -> next;
     do {
         sortedList = add_item_sorted(sortedList, head -> data);
         head = head -> next;
@@ -211,20 +212,28 @@ struct node* add_item_sorted(struct node *sorted_head, int data)
     }
     newNode -> data = data;
     newNode -> next = NULL;
+    prevNode -> data = -1;
+    prevNode -> next = NULL;
     currNode = sorted_head;
     do {
-        if(currNode -> data < newNode -> data){
-            newNode -> next = currNode;
-            prevNode -> next = newNode;
-            break;
-        }
-        else{
-            prevNode = currNode;
-            currNode = currNode -> next;
-        }
+            if(currNode -> data < newNode -> data){
+                if(prevNode -> data > -1) {
+                    newNode -> next = currNode;
+                    prevNode -> next = newNode;
+                    break;
+                }
+                else{
+                    newNode -> next = currNode;
+                    return newNode;
+                }
+            }
+            else{
+                prevNode = currNode;
+                currNode = currNode -> next;
+            }
     }
-    while(currNode -> next == NULL);
-    currNode -> next = newNode;
+    while(currNode);
+    prevNode -> next = newNode;
     return sorted_head;
 }
 

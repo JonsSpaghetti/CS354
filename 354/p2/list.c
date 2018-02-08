@@ -43,25 +43,17 @@ int main(int argc, char *argv[])
     }
 
     /* Read the numbers from the file, into an array */
-    int *intArray; //has to be pointer because we don't want to statically define array size.
-    int arrayLength = 0; //store array length because we don't have intArray[].
-    while(!feof(file)) {
-        int *tmp = realloc(intArray, (arrayLength + 1) * sizeof *intArray);
-        //printf("alloc = %lu\n", (arrayLength + 1) * sizeof *intArray);
-        if(!tmp){
-            printf("Could not resize array, exiting.");
-            exit(1);
-        }
-        else{
-            intArray = tmp;
-        }
-        int input = fscanf(file, "%d\n", intArray + arrayLength);
-        //printf("Val = %d and index = %d\n", *(intArray + arrayLength), arrayLength);
+    //MAYBE try doing this without using realloc - read the file first, get number of lines
+    //then create the array.
+    int intArray[MAX_INTS];
+    char buff[100];
+    int arrayLength = 0;
+    while(fgets(buff, 100, file)){
+        intArray[arrayLength] = strtol(buff, NULL, 10);
         arrayLength++;
     }
 
     /* Print the array */
-    //printf("Length = %d\n", arrayLength);
     print_array(intArray, arrayLength);
 
     /* Create a linked list with the integers from the array */
@@ -75,10 +67,43 @@ int main(int argc, char *argv[])
     *  Search the linked list for the number and print out the result as shown in the specs.
     *  Stop prompting when the user enters 'q' (just the character q without the single quotes).
     */
+    int search = 1;
+    do {
+        int searchNum;
+        printf("Enter an element to be searched in the list and array: ");
+        if(scanf("%d", &searchNum) == 0){
+            char input;
+            scanf("%c", &input);
+            if(input == 'q'){
+                search = 0;
+            }
+            else {
+                break;
+            }
+        }
+        else{
+            int searchResult = search_array(intArray, arrayLength, searchNum);
+            if (searchResult > -1){
+                printf("Element %d found in the array at index %d.\n\n", searchNum, searchResult);
+            }
+            else{
+                printf("Element %d not found in the array.\n\n", searchNum);
+            }
+            searchResult = search_list(linkedList, searchNum);
+            if(searchResult > -1){
+                printf("Element %d found in the linked list at index %d.\n\n", searchNum, searchResult);
+            }
+            else{
+                printf("Element %d not found in the linked  list.\n\n", searchNum);
+            }
+        }
+    } while(search);
 
     /* Create a sorted list(in ascending order) from the unsorted list */
+    struct node *sortedList = create_sorted_list(linkedList);
 
     /* Print the sorted list */
+    //print_list(sortedList);
 
     /* Copy the sorted list to an array with the same sorted order */
 
@@ -100,6 +125,9 @@ int main(int argc, char *argv[])
 struct node* create_list(int intarray[], int len)
 {
     struct node *head = malloc(sizeof(struct node));
+    if (head == NULL){
+        exit(1);
+    }
     head = add_item_at_start(NULL, intarray[0]);
     int i = 1;
     do{
@@ -113,6 +141,9 @@ struct node* create_list(int intarray[], int len)
 struct node* add_item_at_start(struct node *head, int data)
 {
     struct node *newHead = malloc(sizeof(struct node));
+    if (newHead == NULL){
+        exit(1);
+    }
     newHead -> data = data;
     if(head != NULL) {
         newHead -> next = head;
@@ -125,12 +156,28 @@ struct node* add_item_at_start(struct node *head, int data)
 
 int search_list(struct node *head, int element)
 {
-    /* TODO: Complete this function */
+    int count = 0;
+    do {
+        if(head -> data == element){
+            return count;
+        }
+        else{
+            head = head -> next;
+            count++;
+        }
+    }
+    while(head != NULL);
+    return -1;
 }
 
 int search_array(int integers[], int numints, int element)
 {
-    /* TODO: Complete this function */
+    for(int i = 0; i < numints; i++){
+        if (integers[i] == element){
+            return i;
+        }
+    }
+    return -1;
 }
 
 int copy_list_to_array(struct node *head, int *array)
@@ -140,12 +187,45 @@ int copy_list_to_array(struct node *head, int *array)
 
 struct node* create_sorted_list(struct node *head)
 {
-    /* TODO: Complete this function */
+    struct node *sortedList = malloc(sizeof(struct node));
+    if (sortedList == NULL){
+        exit(1);
+    }
+    sortedList -> data = 0;
+    sortedList -> next = NULL;
+    do {
+        sortedList = add_item_sorted(sortedList, head -> data);
+        head = head -> next;
+    }
+    while(head);
+    return sortedList;
 }
 
 struct node* add_item_sorted(struct node *sorted_head, int data)
 {
-    /* TODO: Complete this function */
+    struct node *newNode = malloc(sizeof(struct node));
+    struct node *prevNode = malloc(sizeof(struct node));
+    struct node *currNode = malloc(sizeof(struct node));
+    if(newNode == NULL || prevNode == NULL || currNode == NULL){
+        exit(1);
+    }
+    newNode -> data = data;
+    newNode -> next = NULL;
+    currNode = sorted_head;
+    do {
+        if(currNode -> data < newNode -> data){
+            newNode -> next = currNode;
+            prevNode -> next = newNode;
+            break;
+        }
+        else{
+            prevNode = currNode;
+            currNode = currNode -> next;
+        }
+    }
+    while(currNode -> next == NULL);
+    currNode -> next = newNode;
+    return sorted_head;
 }
 
 void print_list(struct node *head)

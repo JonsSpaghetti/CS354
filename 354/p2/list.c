@@ -216,7 +216,7 @@ struct node* add_item_sorted(struct node *sorted_head, int data)
     prevNode -> next = NULL;
     currNode = sorted_head;
     do {
-            if(currNode -> data < newNode -> data){
+            if(currNode -> data > newNode -> data){
                 if(prevNode -> data > -1) {
                     newNode -> next = currNode;
                     prevNode -> next = newNode;
